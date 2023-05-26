@@ -4,7 +4,7 @@ function performMarketScrape($curl, $request_url, $market)
     curl_setopt($curl, CURLOPT_URL, $request_url);
     // Execute the cURL request
     $response = curl_exec($curl);
-    $response = json_decode($response, true);
+    $response = json_decode($response, true); // Decode the JSON response into an associative array
     // Check for cURL errors
     if ($response === false) {
         $error = curl_error($curl);
