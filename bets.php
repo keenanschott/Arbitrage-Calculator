@@ -60,6 +60,7 @@ function performArbitrageAnalysis($outcomes, $bookmakers, $market, $contenders)
         echo "</th>";
         echo "<th>";
         if (count($outcomes) === 3) {
+            // TODO - implement 3-way market better; room for optimization because this is sort of cringe
             $stakeA = number_format(round((100 / ($outcomes[0] + $outcomes[1] + $outcomes[2])) * ($outcomes[1] * $outcomes[2]), 2), 2); // stake for contender A
             $stakeB = number_format(round((100 / ($outcomes[0] + $outcomes[1] + $outcomes[2])) * ($outcomes[0] * $outcomes[2]), 2), 2); // stake for contender B
             $stakeC = number_format(round((100 / ($outcomes[0] + $outcomes[1] + $outcomes[2])) * ($outcomes[0] * $outcomes[1]), 2), 2); // stake for contender C
@@ -111,5 +112,5 @@ performMarketScrape($curl, "https://api.the-odds-api.com/v4/sports/upcoming/odds
 performMarketScrape($curl, "https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=$key&regions=us&markets=spreads&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag", "Spread");
 performMarketScrape($curl, "https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=$key&regions=us&markets=totals&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag", "Total");
 
-// Close the cURL session
+// close the cURL session
 curl_close($curl);
