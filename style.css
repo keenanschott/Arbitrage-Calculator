@@ -1,0 +1,127 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#navbar {
+    font-family: 'Old Standard TT';
+    background-color: #ECD9C6;
+    font-size: 28px;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 12px 0;
+}
+
+#bets {
+    font-family: 'Poppins';
+    table-layout: fixed;
+    width: 100%;
+    background-color: azure;
+    text-align: center;
+    box-sizing: border-box;
+    -webkit-border-collapse: collapse;
+    border-collapse: collapse;
+    font-size: 14px;
+    height: calc(100% - 48px);
+}
+
+#about {
+    font-family: 'Poppins';
+    width: 100%;
+    background-color: azure;
+    font-size: 14px;
+    margin-bottom: -30px;
+    padding-bottom: 26px;
+}
+
+.abouthover:hover {
+    color: #ECD9C6;
+}
+
+#aboutmargins {
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+#aboutindent {
+    text-indent: 20px;
+}
+
+#aboutheader {
+    font-family: 'Old Standard TT';
+    width: 100%;
+    font-size: 28px;
+    text-align: center;
+    margin: 0;
+    padding: 12px 0;
+}
+
+#bets td,
+#bets th {
+    border: 1px solid #36454f;
+    border-collapse: separate;
+    padding: 8px;
+}
+
+#bottombar {
+    font-family: 'Old Standard TT';
+    background-color: #ECD9C6;
+    font-size: 14px;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+
+    justify-content: center;
+
+    margin-top: 0px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#bottombar #stopwatch {
+    margin-right: auto;
+    margin-left: 4px;
+}
+
+#bottomtext {
+    margin-left: 5px;
+}
+
+#bottombar #refreshButton {
+    font-family: 'Old Standard TT';
+    /* margin-left: 10px; */
+    margin-right: 5px;
+    background-color: #36454f;
+    color: #ECD9C6;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    padding: 8px 16px;
+}
+
+#bottombar #generalButton {
+    font-family: 'Old Standard TT';
+    margin-right: 5px;
+    background-color: #36454f;
+    color: #ECD9C6;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    padding: 8px 16px;
+}
+
+#bottombar #refreshButton:hover {
+    background-color: #293742;
+}
+
+#bottombar #generalButton:hover {
+    background-color: #293742;
+}
