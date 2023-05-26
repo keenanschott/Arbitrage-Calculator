@@ -1,5 +1,4 @@
-html,
-body {
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -74,9 +73,7 @@ body {
     margin: 0;
     display: flex;
     align-items: center;
-
     justify-content: center;
-
     margin-top: 0px;
     padding-top: 8px;
     padding-bottom: 8px;
@@ -93,7 +90,6 @@ body {
 
 #bottombar #refreshButton {
     font-family: 'Old Standard TT';
-    /* margin-left: 10px; */
     margin-right: 5px;
     background-color: #36454f;
     color: #ECD9C6;
