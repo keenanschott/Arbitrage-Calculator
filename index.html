@@ -14,7 +14,7 @@
 
   <script type="text/javascript">
     $(document).ready(function () {
-      calculateBets();
+      calculateBets(); // on page load, calculate bets
     });
     function calculateBets() {
       $('#calc_bets').load('bets.php');
@@ -24,23 +24,19 @@
   <script id="stopwatchScript" type="text/javascript">
     $(document).ready(function () {
       var start = Date.now();
-
       function updateStopwatch() {
         var delta = Date.now() - start; // milliseconds elapsed since start
         var hours = Math.floor(delta / (1000 * 60 * 60));
         var minutes = Math.floor((delta / (1000 * 60)) % 60);
         var seconds = Math.floor((delta / 1000) % 60);
-
         if (minutes < 10) {
           minutes = "0" + minutes; // add leading zero if needed
         }
         if (seconds < 10) {
           seconds = "0" + seconds; // add leading zero if needed
         }
-
         document.getElementById("stopwatch").textContent = hours + ":" + minutes + ":" + seconds; // set text content of 'stopwatch' div
       }
-
       setInterval(updateStopwatch, 1000); // update every second
     });
   </script>
@@ -52,7 +48,6 @@
       });
     });
   </script>
-
 </head>
 
 <body>
@@ -67,10 +62,7 @@
           <th>Stake Percentages</th>
           <th>Profit</th>
         </tr>
-
         <tbody id="calc_bets"></tbody>
-
-
       </table>
     </div>
     <h1 id="bottombar">
@@ -78,8 +70,6 @@
       <div id="stopwatch"></div>
       <button id="refreshButton">Revalidate</button>
     </h1>
-
-
     <table id="bets">
       <tr>
         <th>Away @ Home</th>
@@ -89,56 +79,60 @@
         <th>Profit Given $100 Total Stake</th>
       </tr>
     </table>
-
     <section id="about">
       <div id="aboutmargins">
+        <h1 id="aboutheader" class="abouthover"><u>How It Works</u></h1>
+        <p id="aboutindent">The leftmost column, the <strong class="abouthover">Event</strong> column, is the sporting
+          event that there is currently a sure
+          bet on. The home team is preceded by the away team. The next column, the <strong
+            class="abouthover">Market</strong> column,
+          signifies the type of market there is currently a sure bet
+          on. The different types of markets are as follows: </p>
+        <ul>
+          <li>
+            <h4 class="abouthover">Money</h4>
+            <p>The moneyline is a straightforward type of bet where bettors choose which team they believe will win the
+              game. Instead of considering point spreads or margins, the moneyline assigns odds to each team,
+              representing
+              the amount of money that needs to be wagered to win $100 or the potential profit from a $100 bet. Positive
+              odds indicate the potential profit if betting $100 on the underdog, while negative odds represent the
+              amount
+              you need to bet to win $100 on the favorite.</p>
+          </li>
+          <li>
+            <h4 class="abouthover">Spread</h4>
+            <p>The spread, also known as the point spread or handicap, is a type of bet where the sportsbook assigns a
+              point margin to a game. It is designed to even out the playing field between two teams of differing
+              abilities. The favorite team is indicated with a negative number, representing the points they need to
+              deduct from their final score, while the underdog team is indicated with a positive number, representing
+              the
+              points they receive to add to their final score. Bettors can choose to bet on either team, considering the
+              point spread.</p>
+          </li>
+          <li>
+            <h4 class="abouthover">Total</h4>
+            <p>The total, also known as the over/under, is a type of bet where the sportsbook sets a predicted total
+              combined score for both teams in a game. Bettors can then wager on whether the actual combined score will
+              be
+              over or under the set total. If the total score is exactly equal to the set number, it results in a push,
+              and all bets are refunded.</p>
+          </li>
+        </ul>
 
-
-      <h1 id="aboutheader" class="abouthover"><u>How It Works</u></h1>
-
-
-      <p id="aboutindent">The leftmost column, the <strong class="abouthover">Event</strong> column, is the sporting event that there is currently a sure
-        bet on. The home team is preceded by the away team. The next column, the <strong class="abouthover">Market</strong> column,
-        signifies the type of market there is currently a sure bet
-        on. The different types of markets are as follows: </p>
-      <ul>
-        <li>
-          <h4 class="abouthover">Money</h4>
-          <p>The moneyline is a straightforward type of bet where bettors choose which team they believe will win the
-            game. Instead of considering point spreads or margins, the moneyline assigns odds to each team, representing
-            the amount of money that needs to be wagered to win $100 or the potential profit from a $100 bet. Positive
-            odds indicate the potential profit if betting $100 on the underdog, while negative odds represent the amount
-            you need to bet to win $100 on the favorite.</p>
-        </li>
-        <li>
-          <h4 class="abouthover">Spread</h4>
-          <p>The spread, also known as the point spread or handicap, is a type of bet where the sportsbook assigns a
-            point margin to a game. It is designed to even out the playing field between two teams of differing
-            abilities. The favorite team is indicated with a negative number, representing the points they need to
-            deduct from their final score, while the underdog team is indicated with a positive number, representing the
-            points they receive to add to their final score. Bettors can choose to bet on either team, considering the
-            point spread.</p>
-        </li>
-        <li>
-          <h4 class="abouthover">Total</h4>
-          <p>The total, also known as the over/under, is a type of bet where the sportsbook sets a predicted total
-            combined score for both teams in a game. Bettors can then wager on whether the actual combined score will be
-            over or under the set total. If the total score is exactly equal to the set number, it results in a push,
-            and all bets are refunded.</p>
-        </li>
-      </ul>
-
-      <p id="aboutindent">The next column, the <strong class="abouthover">Betslip</strong> column, is the necessary combination of bets across sportsbooks
-        to ensure a sure bet. By betting on every item within a given cell, a profit is guaranteed. The next column, the
-        <strong class="abouthover">Stake Percentages</strong> column, is how a user needs to split their total stake across bets
-        to guarantee the predicted profit. The last column, the <strong class="abouthover">Profit</strong> column, is how much a user will
-        make given they followed the preceding columns. To prove equivalency, the formula for the profit of each outcome
-        is shown.
-      </p>
-
-    </div>
+        <p id="aboutindent">The next column, the <strong class="abouthover">Betslip</strong> column, is the necessary
+          combination of bets across sportsbooks
+          to ensure a sure bet. By betting on every item within a given cell, a profit is guaranteed. The next column,
+          the
+          <strong class="abouthover">Stake Percentages</strong> column, is how a user needs to split their total stake
+          across bets
+          to guarantee the predicted profit. The last column, the <strong class="abouthover">Profit</strong> column, is
+          how much a user will
+          make given they followed the preceding columns. To prove equivalency, the formula for the profit of each
+          outcome
+          is shown.
+        </p>
+      </div>
     </section>
-
     <h1 id="bottombar">
       <a href="https://en.wikipedia.org/wiki/Arbitrage_betting" target="_blank">
         <button id="generalButton">About</button>
@@ -147,7 +141,6 @@
         <button id="generalButton">GitHub</button>
       </a>
     </h1>
-
   </main>
 </body>
 
