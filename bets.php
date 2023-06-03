@@ -47,33 +47,49 @@ function performArbitrageAnalysis($outcomes, $bookmakers, $market, $contenders)
         return;
     }
     if ($sum < 1.0) { // arbitrage opportunity
-        echo "<tr><th>" . $contenders[1] . " @ " . $contenders[0] . "</th>"; // away team @ home team
-        echo "<th>" . $market . "</th><th>"; // market
-        for ($a = 0; $a < count($outcomes); $a++) {
-            echo $contenders[$a] . " → " . $bookmakers[$a] . ": " . $outcomes[$a] . "/" . decimalToAmerican($outcomes[$a]) . "<br>"; // outcome → sportsbook: decimal odds/american odds
-        }
-        echo "</th><th>"; 
-        if (count($outcomes) === 3) {
-            $stakeA = round((100 / $outcomes[0]) / $sum, 2); // stake for contender A
-            $stakeB = round((100 / $outcomes[1]) / $sum, 2); // stake for contender B
-            $stakeC = 100 - ($stakeA + $stakeB); // stake for contender C
-            echo $stakeA . "%<br>" . $stakeB . "%<br>" . $stakeC . "%"; // display stakes
-        } else {
-            $stakeA = round((100 / $sum) / $outcomes[0], 2); // stake for contender A
-            $stakeB = 100 - $stakeA; // stake for contender B
-            echo $stakeA . "%<br>" . $stakeB . "%"; // display stakes
-        }
-        echo "</th><th>";
-        if (count($outcomes) === 3) {   
-            echo "($stakeA * " . $outcomes[0] . ") - 100 <i>or</i><br>"; // display calculation
-            echo "($stakeB * " . $outcomes[1] . ") - 100 <i>or</i><br>";
-            echo "($stakeC * " . $outcomes[2] . ") - 100<br>&#8773<br>"; 
-        } else {
-            echo "($stakeA * " . $outcomes[0] . ") - 100 <i>or</i><br>"; // display calculation
-            echo "($stakeB * " . $outcomes[1] . ") - 100<br>&#8773;<br>";
-        }
-        echo "$" . number_format(round(100 / $sum - 100, 2), 2) . "</th></tr>"; // display profit
+        echoTeams($contenders); // display teams
+        echoMarket($market); // display market
+        echoBetslip($contenders, $bookmakers, $outcomes); // display betslip
+        echoStakeAndProfit($outcomes, $sum); // display stake and profit
     }
+}
+
+function echoTeams($contenders) {
+    echo "<tr><th>" . $contenders[1] . " @ " . $contenders[0] . "</th>"; // away team @ home team
+}
+
+function echoMarket($market) {
+    echo "<th>" . $market . "</th><th>"; // market
+}
+
+function echoBetslip($contenders, $bookmakers, $outcomes) {
+    for ($i = 0; $i < count($outcomes); $i++) {
+        echo $contenders[$i] . " → " . $bookmakers[$i] . ": " . $outcomes[$i] . "/" . decimalToAmerican($outcomes[$i]) . "<br>"; // outcome → sportsbook: decimal odds/american odds
+    }
+    echo "</th><th>";
+}
+
+function echoStakeAndProfit($outcomes, $sum) {
+    if (count($outcomes) === 3) {
+        $stakeA = round((100 / $outcomes[0]) / $sum, 2); // stake for contender A
+        $stakeB = round((100 / $outcomes[1]) / $sum, 2); // stake for contender B
+        $stakeC = 100 - ($stakeA + $stakeB); // stake for contender C
+        echo $stakeA . "%<br>" . $stakeB . "%<br>" . $stakeC . "%"; // display stakes
+    } else {
+        $stakeA = round((100 / $sum) / $outcomes[0], 2); // stake for contender A
+        $stakeB = 100 - $stakeA; // stake for contender B
+        echo $stakeA . "%<br>" . $stakeB . "%"; // display stakes
+    }
+    echo "</th><th>";
+    if (count($outcomes) === 3) {   
+        echo "($stakeA * " . $outcomes[0] . ") - 100 <i>or</i><br>"; // display calculation
+        echo "($stakeB * " . $outcomes[1] . ") - 100 <i>or</i><br>";
+        echo "($stakeC * " . $outcomes[2] . ") - 100<br>&#8773<br>"; 
+    } else {
+        echo "($stakeA * " . $outcomes[0] . ") - 100 <i>or</i><br>"; // display calculation
+        echo "($stakeB * " . $outcomes[1] . ") - 100<br>&#8773;<br>";
+    }
+    echo "$" . number_format(round(100 / $sum - 100, 2), 2) . "</th></tr>"; // display profit
 }
 
 function decimalToAmerican($decimalOdd)
