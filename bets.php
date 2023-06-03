@@ -90,7 +90,7 @@ function echoStakeAndProfit($outcomes, $sum) {
         echo "($stakeB * " . $outcomes[1] . ") - 100<br>&#8773;<br>";
     }
     echo "$" . number_format(round(100 / $sum - 100, 2), 2) . "</th></tr>"; // display profit
-}
+}   
 
 function decimalToAmerican($decimalOdd)
 {
