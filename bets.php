@@ -41,53 +41,38 @@ function performMarketScrape($curl, $request_url, $market)
 }
 function performArbitrageAnalysis($outcomes, $bookmakers, $market, $contenders)
 {
-    $sum = 0.0; // sum of inverse odds
     if (!in_array(0, $outcomes)) {
-        foreach ($outcomes as $number) {
-            $inverse = 1 / $number;
-            $sum += $inverse;
-        }
+        $sum = array_sum(array_map(fn($number) => 1 / $number, $outcomes)); // sum of inverse odds
     } else {
         return;
     }
     if ($sum < 1.0) { // arbitrage opportunity
-        echo "<tr>";
-        echo "<th>" . $contenders[1] . " @ " . $contenders[0] . "</th>"; // away team @ home team
-        echo "<th>" . $market . "</th>"; // market
-        echo "<th>"; 
+        echo "<tr><th>" . $contenders[1] . " @ " . $contenders[0] . "</th>"; // away team @ home team
+        echo "<th>" . $market . "</th><th>"; // market
         for ($a = 0; $a < count($outcomes); $a++) {
             echo $contenders[$a] . " → " . $bookmakers[$a] . ": " . $outcomes[$a] . "/" . decimalToAmerican($outcomes[$a]) . "<br>"; // outcome → sportsbook: decimal odds/american odds
         }
-        echo "</th>";
-        echo "<th>";
+        echo "</th><th>"; 
         if (count($outcomes) === 3) {
-            // TODO - implement 3-way market better; room for optimization because this is sort of cringe
-            $stakeA = number_format(round((100 / ($outcomes[0] + $outcomes[1] + $outcomes[2])) * ($outcomes[1] * $outcomes[2]), 2), 2); // stake for contender A
-            $stakeB = number_format(round((100 / ($outcomes[0] + $outcomes[1] + $outcomes[2])) * ($outcomes[0] * $outcomes[2]), 2), 2); // stake for contender B
-            $stakeC = number_format(round((100 / ($outcomes[0] + $outcomes[1] + $outcomes[2])) * ($outcomes[0] * $outcomes[1]), 2), 2); // stake for contender C
-            $multiplier = 100 / ($stakeA + $stakeB + $stakeC); // multiplier to scale stakes to 100
-            $stakeA = number_format($stakeA * $multiplier, 2); // scaled stake for contender A
-            $stakeB = number_format($stakeB * $multiplier, 2); // scaled stake for contender B
-            $stakeC = number_format($stakeC * $multiplier, 2); // scaled stake for contender C
+            $stakeA = round((100 / $outcomes[0]) / $sum, 2); // stake for contender A
+            $stakeB = round((100 / $outcomes[1]) / $sum, 2); // stake for contender B
+            $stakeC = 100 - ($stakeA + $stakeB); // stake for contender C
             echo $stakeA . "%<br>" . $stakeB . "%<br>" . $stakeC . "%"; // display stakes
         } else {
-            $stakeA = number_format(round((100 / ($outcomes[0] + $outcomes[1])) * $outcomes[1], 2), 2); // stake for contender A
-            $stakeB = number_format(round(100 - $stakeA, 2), 2); // stake for contender B 
+            $stakeA = round((100 / $sum) / $outcomes[0], 2); // stake for contender A
+            $stakeB = 100 - $stakeA; // stake for contender B
             echo $stakeA . "%<br>" . $stakeB . "%"; // display stakes
         }
-        echo "</th>";
-        echo "<th>";
-        if (count($outcomes) === 3) {
-            echo "($stakeA * " . number_format($outcomes[0], 2) . ") - 100 <i>or</i><br>"; // display calculation
-            echo "($stakeB * " . number_format($outcomes[1], 2) . ") - 100 <i>or</i><br>";
-            echo "($stakeC * " . number_format($outcomes[2], 2) . ") - 100<br>=<br>";
+        echo "</th><th>";
+        if (count($outcomes) === 3) {   
+            echo "($stakeA * " . $outcomes[0] . ") - 100 <i>or</i><br>"; // display calculation
+            echo "($stakeB * " . $outcomes[1] . ") - 100 <i>or</i><br>";
+            echo "($stakeC * " . $outcomes[2] . ") - 100<br>&#8773<br>"; 
         } else {
-            echo "($stakeA * " . number_format($outcomes[0], 2) . ") - 100 <i>or</i><br>"; // display calculation
-            echo "($stakeB * " . number_format($outcomes[1], 2) . ") - 100<br>=<br>";
+            echo "($stakeA * " . $outcomes[0] . ") - 100 <i>or</i><br>"; // display calculation
+            echo "($stakeB * " . $outcomes[1] . ") - 100<br>&#8773;<br>";
         }
-        echo "$" . number_format((100 / $sum) - 100, 2); // display profit
-        echo "</th>";
-        echo "</tr>";
+        echo "$" . number_format(round(100 / $sum - 100, 2), 2) . "</th></tr>"; // display profit
     }
 }
 
@@ -100,8 +85,7 @@ function decimalToAmerican($decimalOdd)
     }
 }
 
-$key = file_get_contents("key.txt"); // get the API key from a text file 
-                                     // TODO - move to .env file
+$key = file_get_contents("key.txt"); // get the API key from a text file (not included in repo for security reasons)
 $curl = curl_init();
 
 // set the cURL options
