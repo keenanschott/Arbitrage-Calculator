@@ -10,7 +10,6 @@ function performMarketScrape($curl, $request_url, $market)
         $error = curl_error($curl);
         echo "cURL Error: $error";
     } else {
-        // TODO - take advantage of associative array to make this more efficient
         for ($i = 0; $i < count($response); $i++) {
             $contenders = [$response[$i]["home_team"], $response[$i]["away_team"], "Draw"]; // contender list, assuming 3-way market
             $outcomes = array_fill(0, 3, 0.0); // array of outcomes, assuming 3-way market
@@ -64,7 +63,17 @@ function echoMarket($market) {
 
 function echoBetslip($contenders, $bookmakers, $outcomes) {
     for ($i = 0; $i < count($outcomes); $i++) {
-        echo $contenders[$i] . " → " . $bookmakers[$i] . ": " . $outcomes[$i] . "/" . decimalToAmerican($outcomes[$i]) . "<br>"; // outcome → sportsbook: decimal odds/american odds
+        switch ($i) {
+            case 0:
+                $contender = 1;
+                break;
+            case 1:
+                $contender = 0;
+                break;
+            default:
+                // do nothing
+        }
+        echo $contenders[$contender] . " → " . $bookmakers[$i] . ": " . $outcomes[$i] . "/" . decimalToAmerican($outcomes[$i]) . "<br>"; // outcome → sportsbook: decimal odds/american odds
     }
     echo "</th><th>";
 }
