@@ -70,6 +70,9 @@ function echoBetslip($contenders, $bookmakers, $outcomes) {
             case 1:
                 $contender = 0;
                 break;
+            case 2:
+                $contender = 2;
+                break;
             default:
                 // do nothing
         }
