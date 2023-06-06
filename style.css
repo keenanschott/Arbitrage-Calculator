@@ -30,7 +30,7 @@ html, body {
 #about {
     font-family: 'Poppins';
     width: 100%;
-    background-color: azure;
+    background: linear-gradient(to bottom, azure, #D1E4F0);
     font-size: 14px;
     margin-bottom: -30px;
     padding-bottom: 26px;
