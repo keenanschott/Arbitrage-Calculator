@@ -70,11 +70,8 @@ function echoBetslip($contenders, $bookmakers, $outcomes) {
             case 1:
                 $contender = 0;
                 break;
-            case 2:
-                $contender = 2;
-                break;
             default:
-                // do nothing
+                $contender = $i;
         }
         echo $contenders[$contender] . " → " . $bookmakers[$i] . ": " . $outcomes[$i] . "/" . decimalToAmerican($outcomes[$i]) . "<br>"; // outcome → sportsbook: decimal odds/american odds
     }
