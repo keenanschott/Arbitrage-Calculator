@@ -58,64 +58,60 @@ function performArbitrageAnalysis(outcomes, bookmakers, market, contenders) {
     if (!outcomes.includes(0)) {
         const sum = outcomes.reduce((acc, odd) => acc + (1 / odd), 0); // Sum of inverse odds
         if (sum < 1.0) { // Arbitrage opportunity
-            echoTeams(contenders); // Display teams
-            echoMarket(market); // Display market
-            echoBetslip(contenders, bookmakers, outcomes); // Display betslip
-            echoStakeAndProfit(outcomes, sum); // Display stake and profit
+            // Construct a table row with data for each column
+            let row = "<tr>";
+
+            // Add Event (Team names) to the row
+            row += `<td>${contenders[1]} @ ${contenders[0]}</td>`;  // echoTeams equivalent
+
+            // Add Market to the row
+            row += `<td>${market}</td>`;  // echoMarket equivalent
+
+            // Add Betslip to the row
+            let betslipContent = "";
+            for (let i = 0; i < outcomes.length; i++) {
+                let contender;
+                switch (i) {
+                    case 0:
+                        contender = 1;
+                        break;
+                    case 1:
+                        contender = 0;
+                        break;
+                    default:
+                        contender = i;
+                }
+                betslipContent += `${contenders[contender]} → ${bookmakers[i]}: ${outcomes[i]} / ${decimalToAmerican(outcomes[i])}<br>`;
+            }
+            row += `<td>${betslipContent}</td>`;  // echoBetslip equivalent
+
+            // Add Stake Percentages and Profit to the row
+            let stakeA, stakeB, stakeC;
+            let stakeContent = "";
+            if (outcomes.length === 3) {
+                stakeA = Math.round((100 / outcomes[0]) / sum * 100) / 100;
+                stakeB = Math.round((100 / outcomes[1]) / sum * 100) / 100;
+                stakeC = 100 - (stakeA + stakeB);
+                stakeContent = `${stakeA}%<br>${stakeB}%<br>${stakeC}%`; // Display stakes
+            } else {
+                stakeA = Math.round((100 / sum) / outcomes[0] * 100) / 100;
+                stakeB = 100 - stakeA;
+                stakeContent = `${stakeA}%<br>${stakeB}%`; // Display stakes
+            }
+
+            row += `<td>${stakeContent}</td>`; // echoStake equivalent
+
+            // Add profit to the row
+            const profit = (100 / sum - 100).toFixed(2);
+            row += `<td>$${profit}</td>`; // echoProfit equivalent
+
+            // Close the row
+            row += "</tr>";
+
+            // Append the row to the table body
+            $('#calc_bets').append(row);
         }
     }
-}
-
-// Function to display the teams
-function echoTeams(contenders) {
-    console.log(`${contenders[1]} @ ${contenders[0]}`); // Away team @ Home team
-}
-
-// Function to display the market
-function echoMarket(market) {
-    console.log(`${market}`); // Market
-}
-
-// Function to display the betslip
-function echoBetslip(contenders, bookmakers, outcomes) {
-    for (let i = 0; i < outcomes.length; i++) {
-        let contender;
-        switch (i) {
-            case 0:
-                contender = 1;
-                break;
-            case 1:
-                contender = 0;
-                break;
-            default:
-                contender = i;
-        }
-        console.log(`${contenders[contender]} → ${bookmakers[i]}: ${outcomes[i]} / ${decimalToAmerican(outcomes[i])}`);
-    }
-}
-
-// Function to display stakes and profit
-function echoStakeAndProfit(outcomes, sum) {
-    let stakeA, stakeB, stakeC;
-    if (outcomes.length === 3) {
-        stakeA = Math.round((100 / outcomes[0]) / sum * 100) / 100;
-        stakeB = Math.round((100 / outcomes[1]) / sum * 100) / 100;
-        stakeC = 100 - (stakeA + stakeB);
-        console.log(`${stakeA}%\n${stakeB}%\n${stakeC}%`); // Display stakes
-    } else {
-        stakeA = Math.round((100 / sum) / outcomes[0] * 100) / 100;
-        stakeB = 100 - stakeA;
-        console.log(`${stakeA}%\n${stakeB}%`); // Display stakes
-    }
-
-    if (outcomes.length === 3) {
-        console.log(`(${stakeA} * ${outcomes[0]}) - 100\n(${stakeB} * ${outcomes[1]}) - 100\n(${stakeC} * ${outcomes[2]}) - 100`);
-    } else {
-        console.log(`(${stakeA} * ${outcomes[0]}) - 100\n(${stakeB} * ${outcomes[1]}) - 100`);
-    }
-
-    const profit = (100 / sum - 100).toFixed(2);
-    console.log(`≈\n$${profit}`);
 }
 
 // Function to convert decimal odds to American odds
