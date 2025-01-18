@@ -2,6 +2,18 @@ $(document).ready(function () {
     calculateBets(); // Calculate bets when the page is loaded
     startStopwatch(); // Start the stopwatch when the page is loaded
 
+    // Event listener for the "Set API Key" button
+    document.getElementById("setApiKeyButton").addEventListener("click", function () {
+        const apiKey = document.getElementById("apiKeyInput").value; // Get the value from the input field
+        if (apiKey) {
+            // Store API Key in localStorage or use it for requests
+            localStorage.setItem("apiKey", apiKey);
+            alert("API Key has been set successfully!");
+        } else {
+            alert("Please enter a valid API Key.");
+        }
+    });
+
     document.getElementById("refreshButton").addEventListener("click", function () {
         location.reload(); // Reload the page when the refresh button is clicked
     });
@@ -9,7 +21,7 @@ $(document).ready(function () {
 
 // Function to fetch the API key from the server (or hidden environment) securely
 function getApiKey() {
-    return "c8fe1c08cf273f191f022351551161fb";
+    return localStorage.getItem("apiKey") || ""; // Retrieve stored API key or return an empty string if not set
 }
 
 // Function to perform the market scrape
@@ -127,6 +139,10 @@ function decimalToAmerican(decimalOdd) {
 async function calculateBets() {
     // Get API Key dynamically
     const apiKey = getApiKey();
+    if (!apiKey) {
+        alert("API Key is not set. Please enter an API Key.");
+        return; // Stop execution if API Key is not set
+    }
 
     performMarketScrape(
         `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
