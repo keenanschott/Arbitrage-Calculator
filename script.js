@@ -170,15 +170,15 @@ async function calculateBets() {
         return;
     }
     await performMarketScrape(
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
+        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag`,
         "money"
     );
     await performMarketScrape(
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
+        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag`,
         "spread"
     );
     await performMarketScrape(
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
+        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag`,
         "total"
     );
     if ($('#calc_bets').is(':empty')) {

@@ -19,9 +19,9 @@ body {
 }
 
 hr {
-    border: none;                
-    height: 1px;                  
-    background-color: #282828;            
+    border: none;
+    height: 1px;
+    background-color: #282828;
 }
 
 #settings {
@@ -29,11 +29,12 @@ hr {
     font-size: 14px;
     max-width: 600px;
     margin: 0px auto;
-    padding: 10px 0;
+    padding: 10px 10px;
     padding-bottom: 16px;
 }
 
-input[type="text"], button {
+input[type="text"],
+button {
     font-family: "Tomorrow", serif;
     padding: 5px 10px;
     border: 1px solid #282828;
@@ -49,7 +50,7 @@ input[type="text"]:focus {
     background-color: white;
     box-shadow: 0 0 5px rgba(28, 28, 28, 0.3);
 }
-  
+
 button:hover {
     cursor: pointer;
     outline: none;
@@ -57,19 +58,19 @@ button:hover {
     background-color: white;
     box-shadow: 0 0 5px rgba(28, 28, 28, 0.3);
 }
-  
+
 #key {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
 }
-  
+
 #key div {
     display: flex;
     align-items: center;
 }
-  
+
 #apiKeyInput {
     margin-right: 10px;
 }
