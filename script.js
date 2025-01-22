@@ -1,26 +1,29 @@
 $(document).ready(function () {
-    const storedApiKey = localStorage.getItem("apiKey");
-    if (storedApiKey) {
-        $('#apiKeyInput').val(storedApiKey);
+    const storedApiKey = localStorage.getItem("apiKey") ?? "";
+    // if it's an empty string, set it just in case
+    if (storedApiKey === "") {
+        localStorage.setItem("apiKey", "");
     }
-    calculateBets();
+    // display the stored string
+    $('#apiKeyInput').val(storedApiKey);
+    // button
     document.getElementById("setApiKeyButton").addEventListener("click", function () {
         const apiKey = document.getElementById("apiKeyInput").value;
-        if (apiKey.trimEnd() === localStorage.getItem("apiKey").trimEnd()) {
-            return;
-        }
-        if (apiKey || apiKey == "") {
+        if (apiKey || apiKey === "") {
             localStorage.setItem("apiKey", apiKey);
         }
+        // fill the table
         $('#calc_bets').empty();
         calculateBets();
     });
+    // theme
     const storedMode = localStorage.getItem("darkMode");
     if (storedMode === "enabled") {
         $('#theme-link').attr('href', 'dark.css');
     } else if (storedMode === "disabled") {
         $('#theme-link').attr('href', 'light.css');
     } else {
+        // browser preference
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             $('#theme-link').attr('href', 'dark.css');
             localStorage.setItem("darkMode", "enabled");
@@ -29,6 +32,7 @@ $(document).ready(function () {
             localStorage.setItem("darkMode", "disabled");
         }
     }
+    // toggle icon
     if (localStorage.getItem("darkMode") === "enabled") {
         document.getElementById('themeIcon').classList.add("fa-moon-o");
     } else {
@@ -48,11 +52,9 @@ $(document).ready(function () {
             themeIcon.classList.add('fa-moon-o');
         }
     });
+    // fill the table
+    calculateBets();
 });
-
-function getApiKey() {
-    return localStorage.getItem("apiKey") || "";
-}
 
 async function performMarketScrape(requestUrl, market) {
     try {
@@ -157,7 +159,7 @@ function decimalToAmerican(decimalOdd) {
 }
 
 async function calculateBets() {
-    const apiKey = getApiKey().trimEnd();
+    const apiKey = localStorage.getItem("apiKey").trimEnd();
     if (apiKey == "") {
         $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>please enter a key to find arbitrage opportunities</td></tr>");
         return;
@@ -167,15 +169,15 @@ async function calculateBets() {
         $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>invalid key, try again</td></tr>");
         return;
     }
-    performMarketScrape(
+    await performMarketScrape(
         `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
         "money"
     );
-    performMarketScrape(
+    await performMarketScrape(
         `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
         "spread"
     );
-    performMarketScrape(
+    await performMarketScrape(
         `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=fanduel,betmgm,draftkings,circasports,pointsbetus,barstool,betrivers,superbook,mybookieag`,
         "total"
     );
