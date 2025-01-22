@@ -65,6 +65,7 @@ async function performMarketScrape(requestUrl, market) {
             const contenders = [match.home_team, match.away_team, "Draw"];
             let bestOutcomes = Array(3).fill(0.0);
             let bestBookmakers = Array(3).fill(null);
+            let bestLinks = Array(3).fill(null);
             for (const bookmaker of match.bookmakers ?? []) {
                 for (const marketEntry of bookmaker.markets ?? []) {
                     for (let i = 0; i < marketEntry.outcomes.length; i++) {
@@ -72,6 +73,7 @@ async function performMarketScrape(requestUrl, market) {
                         if (outcome.price > bestOutcomes[i]) {
                             bestOutcomes[i] = outcome.price;
                             bestBookmakers[i] = bookmaker.key;
+                            bestLinks[i] = (bookmaker.link ?? "").replace("{state}", "nv");
                         }
                     }
                 }
@@ -79,8 +81,9 @@ async function performMarketScrape(requestUrl, market) {
             if (bestOutcomes[2] === 0.0) {
                 bestOutcomes.pop();
                 bestBookmakers.pop();
+                bestLinks.pop();
             }
-            const row = performArbitrageAnalysis(bestOutcomes, bestBookmakers, market, contenders);
+            const row = performArbitrageAnalysis(bestOutcomes, bestBookmakers, bestLinks, market, contenders);
             if (row) {
                 rows.push(row);
             }
@@ -103,7 +106,7 @@ async function testConnection(key) {
     }
 }
 
-function performArbitrageAnalysis(outcomes, bookmakers, market, contenders) {
+function performArbitrageAnalysis(outcomes, bookmakers, links, market, contenders) {
     if (outcomes.every(odd => odd > 0)) {
         const inverseSum = outcomes.reduce((acc, odd) => acc + (1 / odd), 0);
         if (inverseSum < 1.0) {
@@ -111,10 +114,10 @@ function performArbitrageAnalysis(outcomes, bookmakers, market, contenders) {
             row.html += `<tr>`;
             row.html += `<td>${contenders[1]} @ ${contenders[0]}</td>`;
             row.html += `<td>${market}</td>`;
-
-            let betslipContent = outcomes.map((odd, i) => {
-                const americanOdd = decimalToAmerican(odd);
-                return `${bookmakers[i]}: ${odd} / ${americanOdd}`;
+            let betslipContent = outcomes.map((outcome, i) => {
+                const americanOdd = decimalToAmerican(outcome);
+                const bookmakerLink = links[i] ? `<b><a href="${links[i]}" target="_blank" class="no-style">${bookmakers[i]}</a></b>` : bookmakers[i];
+                return `${contenders[i]} -> ${bookmakerLink}: ${outcome} / ${americanOdd}`;
             }).join("<br>");
             row.html += `<td>${betslipContent}</td>`;
             const stakes = outcomes.map(odd => Math.round((100 / odd) / inverseSum * 100) / 100);
@@ -149,13 +152,13 @@ async function calculateBets() {
         return;
     }
     const urls = [
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag`,
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag`,
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag`,
+        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`,
+        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`,
+        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`,
     ];
     let allRows = [];
     for (const url of urls) {
-        const rows = await performMarketScrape(url, url.includes("h2h") ? "money" : url.includes("spreads") ? "spread" : "total");
+        const rows = await performMarketScrape(url, url.includes("h2h") ? "moneyline" : url.includes("spreads") ? "spread" : "total");
         allRows = allRows.concat(rows);
     }
     if (allRows.length > 0) {
