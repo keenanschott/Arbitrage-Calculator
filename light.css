@@ -1,0 +1,133 @@
+html,
+body {
+    height: 100%;
+    max-width: 800px;
+    margin: 0px auto;
+    line-height: 1.5;
+}
+
+#navbar {
+    user-select: none;
+    font-family: "Share Tech Mono", serif;
+    background-color: white;
+    color: #282828;
+    font-size: 28px;
+    text-align: center;
+    margin: 0;
+    padding: 12px 0;
+    padding-bottom: 8px;
+}
+
+hr {
+    border: none;                
+    height: 1px;                  
+    background-color: #282828;            
+}
+
+#settings {
+    font-family: "Tomorrow", serif;
+    font-size: 14px;
+    max-width: 600px;
+    margin: 0px auto;
+    padding: 10px 0;
+    padding-bottom: 16px;
+}
+
+input[type="text"], button {
+    font-family: "Tomorrow", serif;
+    padding: 5px 10px;
+    border: 1px solid #282828;
+    background-color: white;
+    color: #282828;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #78b5e3;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(28, 28, 28, 0.3);
+}
+  
+button:hover {
+    cursor: pointer;
+    outline: none;
+    border-color: #78b5e3;
+    background-color: white;
+    box-shadow: 0 0 5px rgba(28, 28, 28, 0.3);
+}
+  
+#key {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+#key div {
+    display: flex;
+    align-items: center;
+}
+  
+#apiKeyInput {
+    margin-right: 10px;
+}
+
+.no-style {
+    text-decoration: none;
+    color: inherit;
+}
+
+#bets {
+    font-family: "Tomorrow", serif;
+    table-layout: fixed;
+    width: 100%;
+    background-color: white;
+    text-align: center;
+    box-sizing: border-box;
+    -webkit-border-collapse: collapse;
+    border-collapse: collapse;
+    font-size: 14px;
+    height: calc(100% - 48px);
+}
+
+#bets td,
+#bets th {
+    border: 1px solid #282828;
+    border-collapse: separate;
+    padding: 8px;
+}
+
+.footer-divider {
+    margin-top: 18px;
+}
+
+footer {
+    font-family: "Tomorrow", serif;
+    font-size: 14px;
+    text-align: center;
+}
+
+.footer-icons {
+    color: #282828;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    user-select: none;
+}
+
+.icon-link {
+    margin: 0 5px;
+    color: #282828;
+    text-decoration: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.icon-link:hover {
+    color: #78b5e3;
+}
+
+.footer-text {
+    margin-top: 0px;
+}

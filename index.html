@@ -1,118 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Arbitrage Calculator</title>
-  <link rel="stylesheet" href="./style.css">
+  <title>arbitrage calculator</title>
+  <link id="theme-link" rel="stylesheet" href="light.css">
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Old+Standard+TT">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Tomorrow&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <body>
   <main>
     <script src="script.js"></script>
-    <h1 id="navbar">Arbitrage Calculator</h1>
-    <div id="content">
+    <a href="/" class="no-style">
+      <h1 id="navbar">arbitrage calculator</h1>
+    </a>
+    <hr>
+    <div id="settings">
+      <div id="key">
+        <div>
+          <label for="apiKeyInput">
+            <a target="_blank" href="https://the-odds-api.com/" class="no-style">
+              <b>the-odds-api</b>
+            </a> key
+          </label>
+        </div>
+        <div>
+          <input type="text" autocomplete="off" id="apiKeyInput">
+          <button id="setApiKeyButton">
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
       <table id="bets">
         <tr>
-          <th>Event</th>
-          <th>Market</th>
-          <th>Betslip</th>
-          <th>Stake Percentages</th>
-          <th>Profit</th>
+          <th>event</th>
+          <th>market</th>
+          <th>betslip</th>
+          <th>stake</th>
+          <th>profit</th>
         </tr>
         <tbody id="calc_bets"></tbody>
       </table>
     </div>
-    <h1 id="bottombar">
-      <div id="bottomtext">Time Since Last Validation: </div>
-      <div id="stopwatch"></div>
-      <button id="refreshButton">Revalidate</button>
-    </h1>
-    <h1 id="bottombar">
-      <div>
-        <label for="apiKeyInput">API Key: </label>
-        <input type="text" id="apiKeyInput" placeholder="Enter your API Key">
-        <button id="setApiKeyButton">Set API Key</button>
+    <footer>
+      <hr class="footer-divider">
+      <div class="footer-icons">
+          <a class="icon-link" id="darkModeToggle">
+            <i class="fa" id="themeIcon"></i>
+          </a>
+          <a href="https://en.wikipedia.org/wiki/Arbitrage_betting" target="_blank" class="icon-link">
+            <i class="fa fa-info-circle"></i>
+          </a>
+          <a href="https://github.com/keenanschott/Arbitrage-Calculator" target="_blank" class="icon-link">
+              <i class="fa fa-github"></i>
+          </a>
       </div>
-    </h1>
-    <table id="bets">
-      <tr>
-        <th>Away @ Home</th>
-        <th>Money/Spread/Total</th>
-        <th>Outcome → Sportsbook: Decimal Odds/American Odds</th>
-        <th>Stake Percentage for Given Outcome</th>
-        <th>Profit Given $100 Total Stake</th>
-      </tr>
-    </table>
-    <section id="about">
-      <div id="aboutmargins">
-        <h1 id="aboutheader" class="abouthover"><u>How It Works</u></h1>
-        <p id="aboutindent">The leftmost column, the <strong class="abouthover">Event</strong> column, is the sporting
-          event that there is currently a sure
-          bet on. The home team is preceded by the away team. The next column, the <strong
-            class="abouthover">Market</strong> column,
-          signifies the type of market there is currently a sure bet
-          on. The different types of markets are as follows: </p>
-        <ul>
-          <li>
-            <h4 class="abouthover">Money</h4>
-            <p>The moneyline is a straightforward type of bet where bettors choose which team they believe will win the
-              game. Instead of considering point spreads or margins, the moneyline assigns odds to each team,
-              representing
-              the amount of money that needs to be wagered to win $100 or the potential profit from a $100 bet. Positive
-              odds indicate the potential profit if betting $100 on the underdog, while negative odds represent the
-              amount
-              you need to bet to win $100 on the favorite.</p>
-          </li>
-          <li>
-            <h4 class="abouthover">Spread</h4>
-            <p>The spread, also known as the point spread or handicap, is a type of bet where the sportsbook assigns a
-              point margin to a game. It is designed to even out the playing field between two teams of differing
-              abilities. The favorite team is indicated with a negative number, representing the points they need to
-              deduct from their final score, while the underdog team is indicated with a positive number, representing
-              the
-              points they receive to add to their final score. Bettors can choose to bet on either team, considering the
-              point spread.</p>
-          </li>
-          <li>
-            <h4 class="abouthover">Total</h4>
-            <p>The total, also known as the over/under, is a type of bet where the sportsbook sets a predicted total
-              combined score for both teams in a game. Bettors can then wager on whether the actual combined score will
-              be
-              over or under the set total. If the total score is exactly equal to the set number, it results in a push,
-              and all bets are refunded.</p>
-          </li>
-        </ul>
-
-        <p id="aboutindent">The next column, the <strong class="abouthover">Betslip</strong> column, is the necessary
-          combination of bets across sportsbooks
-          to ensure a sure bet. By betting on every item within a given cell, a profit is guaranteed. The next column,
-          the
-          <strong class="abouthover">Stake Percentages</strong> column, is how a user needs to split their total stake
-          across bets
-          to guarantee the predicted profit. The last column, the <strong class="abouthover">Profit</strong> column, is
-          how much a user will
-          make given they followed the preceding columns. To prove equivalency, the formula for the profit of each
-          outcome
-          is shown.
-        </p>
+      <div class="footer-text">
+          <p>© 2025 Keenan Schott. All Rights Reserved.</p>
       </div>
-    </section>
-    <h1 id="bottombar">
-      <a href="https://en.wikipedia.org/wiki/Arbitrage_betting" target="_blank">
-        <button id="generalButton">About</button>
-      </a>
-      <a href="https://github.com/keenanschott" target="_blank">
-        <button id="generalButton">GitHub</button>
-      </a>
-    </h1>
+  </footer>
   </main>
 </body>
-
 </html>
