@@ -93,11 +93,21 @@ button:hover {
     height: calc(100% - 48px);
 }
 
-#bets td,
+#bets td {
+    border: 1px solid #282828;
+    border-collapse: separate;
+    padding: 8px;
+}
+
 #bets th {
     border: 1px solid #282828;
     border-collapse: separate;
     padding: 8px;
+    cursor: default;
+}
+
+#bets th:hover {
+    color: #78b5e3;
 }
 
 .footer-divider {
