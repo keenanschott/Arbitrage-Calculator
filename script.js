@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(document).ready(async function () {
     const storedApiKey = localStorage.getItem("apiKey") ?? "";
     // if it's an empty string, set it just in case
     if (storedApiKey === "") {
@@ -7,14 +7,14 @@ $(document).ready(function () {
     // display the stored string
     $('#apiKeyInput').val(storedApiKey);
     // button
-    document.getElementById("setApiKeyButton").addEventListener("click", function () {
+    document.getElementById("setApiKeyButton").addEventListener("click", async function () {
         const apiKey = document.getElementById("apiKeyInput").value;
         if (apiKey || apiKey === "") {
             localStorage.setItem("apiKey", apiKey);
         }
         // fill the table
         $('#calc_bets').empty();
-        calculateBets();
+        await calculateBets();
     });
     // theme
     const storedMode = localStorage.getItem("darkMode");
@@ -53,7 +53,7 @@ $(document).ready(function () {
         }
     });
     // fill the table
-    calculateBets();
+    await calculateBets();
 });
 
 async function performMarketScrape(requestUrl, market) {
