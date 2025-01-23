@@ -11,3 +11,7 @@ Per [Wikipedia](https://en.wikipedia.org/wiki/Arbitrage_betting), betting arbitr
 ## Closing Remarks
 
 This project welcomes open-source contributions. While I personally prefer to keep the site simple and lightweight, I am open to adopting a web framework if greater complexity becomes necessary. However, as long as this remains primarily a personal tool, I am inclined to avoid developing a back-end or incorporating web frameworks.
+
+## Status
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/08f439d2-43af-495a-b148-c342e85f9d91/deploy-status)](https://app.netlify.com/sites/arbitragecalculator/deploys)
