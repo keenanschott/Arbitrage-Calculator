@@ -1,58 +1,74 @@
 $(document).ready(async function () {
+    // fetch the stored API key from local storage or set an empty string if not present
     const storedApiKey = localStorage.getItem("apiKey") ?? "";
-    // if it's an empty string, set it just in case
     if (storedApiKey === "") {
         localStorage.setItem("apiKey", "");
     }
-    // display the stored string
+    // set the stored API key in the input field
     $('#apiKeyInput').val(storedApiKey);
-    // button
+    // add a click event listener to the "Set API Key" button
     document.getElementById("setApiKeyButton").addEventListener("click", async function () {
         const apiKey = document.getElementById("apiKeyInput").value;
+        // update local storage with the new API key
         if (apiKey || apiKey === "") {
             localStorage.setItem("apiKey", apiKey);
         }
-        // fill the table
+        // clear the results table and trigger calculation
         $('#calc_bets').empty();
         await calculateBets();
     });
-    // theme
+    // theme initialization: check stored preferences or browser defaults
     const storedMode = localStorage.getItem("darkMode");
+    const themeLink = $('#theme-link');
+    const themeIcon = document.getElementById('themeIcon');
+    const favicon = document.getElementById('favicon');
+    // apply the correct theme and favicon based on stored preferences
     if (storedMode === "enabled") {
-        $('#theme-link').attr('href', 'dark.css');
+        themeLink.attr('href', 'dark.css');
+        themeIcon.classList.add('fa-sun-o');
+        favicon.href = 'darkicon.ico';
     } else if (storedMode === "disabled") {
-        $('#theme-link').attr('href', 'light.css');
+        themeLink.attr('href', 'light.css');
+        themeIcon.classList.add('fa-moon-o');
+        favicon.href = 'lighticon.ico';
     } else {
-        // browser preference
+        // use browser preferences if no stored preference exists
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            $('#theme-link').attr('href', 'dark.css');
+            themeLink.attr('href', 'dark.css');
+            themeIcon.classList.add('fa-sun-o');
+            favicon.href = 'darkicon.ico';
             localStorage.setItem("darkMode", "enabled");
         } else {
-            $('#theme-link').attr('href', 'light.css');
+            themeLink.attr('href', 'light.css');
+            themeIcon.classList.add('fa-moon-o');
+            favicon.href = 'lighticon.ico';
             localStorage.setItem("darkMode", "disabled");
         }
     }
-    // toggle icon
+    // add theme icon class based on the current mode
     if (localStorage.getItem("darkMode") === "enabled") {
         document.getElementById('themeIcon').classList.add("fa-sun-o");
     } else {
         document.getElementById('themeIcon').classList.add("fa-moon-o");
     }
+    // add a click event listener for toggling the theme
     $('#darkModeToggle').click(function () {
         const currentTheme = $('#theme-link').attr('href');
         if (currentTheme === 'light.css') {
-            $('#theme-link').attr('href', 'dark.css');
+            themeLink.attr('href', 'dark.css');
             localStorage.setItem("darkMode", "enabled");
             themeIcon.classList.remove('fa-moon-o');
             themeIcon.classList.add('fa-sun-o');
+            favicon.href = 'darkicon.ico';
         } else {
-            $('#theme-link').attr('href', 'light.css');
+            themeLink.attr('href', 'light.css');
             localStorage.setItem("darkMode", "disabled");
             themeIcon.classList.remove('fa-sun-o');
             themeIcon.classList.add('fa-moon-o');
+            favicon.href = 'lighticon.ico';
         }
     });
-    // fill the table
+    // trigger bet calculation and display
     await calculateBets();
 });
 
@@ -61,11 +77,13 @@ async function performMarketScrape(requestUrl, market) {
         const response = await fetch(requestUrl);
         const data = await response.json();
         let rows = [];
+        // iterate through the matches in the data
         for (const match of data) {
             const contenders = [match.home_team, match.away_team, "DRAW"];
             let bestOutcomes = Array(3).fill(0.0);
             let bestBookmakers = Array(3).fill(null);
             let bestLinks = Array(3).fill(null);
+            // identify the best odds for each outcome
             for (const bookmaker of match.bookmakers ?? []) {
                 for (const marketEntry of bookmaker.markets ?? []) {
                     for (let i = 0; i < marketEntry.outcomes.length; i++) {
@@ -78,11 +96,13 @@ async function performMarketScrape(requestUrl, market) {
                     }
                 }
             }
+            // remove "DRAW" if it doesn't have odds
             if (bestOutcomes[2] === 0.0) {
                 bestOutcomes.pop();
                 bestBookmakers.pop();
                 bestLinks.pop();
             }
+            // analyze arbitrage opportunities
             const row = performArbitrageAnalysis(bestOutcomes, bestBookmakers, bestLinks, market, contenders);
             if (row) {
                 rows.push(row);
@@ -95,10 +115,11 @@ async function performMarketScrape(requestUrl, market) {
     }
 }
 
+// test API key validity
 async function testConnection(key) {
     try {
         const response = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${key}`);
-        return response.status !== 401;
+        return response.status !== 401; // invalid key results in a 401 status
     }
     catch (error) {
         console.error(`Failed to fetch using the following key: ${key}`, error);
@@ -106,6 +127,7 @@ async function testConnection(key) {
     }
 }
 
+// analyze the odds to determine if there's an arbitrage opportunity
 function performArbitrageAnalysis(outcomes, bookmakers, links, market, contenders) {
     if (outcomes.every(odd => odd > 0)) {
         const inverseSum = outcomes.reduce((acc, odd) => acc + (1 / odd), 0);
@@ -133,6 +155,7 @@ function performArbitrageAnalysis(outcomes, bookmakers, links, market, contender
     return null;
 }
 
+// convert decimal odds to american odds
 function decimalToAmerican(decimalOdd) {
     if (decimalOdd >= 2.0) {
         return `+${Math.round((decimalOdd - 1) * 100)}`;
@@ -141,6 +164,7 @@ function decimalToAmerican(decimalOdd) {
     }
 }
 
+// calculate and display arbitrage opportunities
 async function calculateBets() {
     const apiKey = localStorage.getItem("apiKey").trimEnd();
     if (apiKey === "") {
