@@ -93,7 +93,6 @@ button:hover {
     -webkit-border-collapse: collapse;
     border-collapse: collapse;
     font-size: 14px;
-    height: calc(100% - 48px);
 }
 
 #bets td {
