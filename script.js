@@ -34,9 +34,9 @@ $(document).ready(async function () {
     }
     // toggle icon
     if (localStorage.getItem("darkMode") === "enabled") {
-        document.getElementById('themeIcon').classList.add("fa-moon-o");
-    } else {
         document.getElementById('themeIcon').classList.add("fa-sun-o");
+    } else {
+        document.getElementById('themeIcon').classList.add("fa-moon-o");
     }
     $('#darkModeToggle').click(function () {
         const currentTheme = $('#theme-link').attr('href');
@@ -62,7 +62,7 @@ async function performMarketScrape(requestUrl, market) {
         const data = await response.json();
         let rows = [];
         for (const match of data) {
-            const contenders = [match.home_team, match.away_team, "Draw"];
+            const contenders = [match.home_team, match.away_team, "DRAW"];
             let bestOutcomes = Array(3).fill(0.0);
             let bestBookmakers = Array(3).fill(null);
             let bestLinks = Array(3).fill(null);
@@ -73,7 +73,7 @@ async function performMarketScrape(requestUrl, market) {
                         if (outcome.price > bestOutcomes[i]) {
                             bestOutcomes[i] = outcome.price;
                             bestBookmakers[i] = bookmaker.key;
-                            bestLinks[i] = (bookmaker.link ?? "").replace("{state}", "nv");
+                            bestLinks[i] = (bookmaker.link ?? "").replace("{state}", "co");
                         }
                     }
                 }
@@ -117,8 +117,9 @@ function performArbitrageAnalysis(outcomes, bookmakers, links, market, contender
             let betslipContent = outcomes.map((outcome, i) => {
                 const americanOdd = decimalToAmerican(outcome);
                 const bookmakerLink = links[i] ? `<b><a href="${links[i]}" target="_blank" class="no-style">${bookmakers[i]}</a></b>` : bookmakers[i];
-                return `${contenders[i]} -> ${bookmakerLink}: ${outcome} / ${americanOdd}`;
-            }).join("<br>");
+                const contender = (i === 0 ? contenders[1] : i === 1 ? contenders[0] : contenders[i]).replace(/[^A-Z0-9]/g, '');
+                return `${contender}<br>${bookmakerLink}<br>${outcome} / ${americanOdd}`;
+            }).join("<br><b>+</b><br>");
             row.html += `<td>${betslipContent}</td>`;
             const stakes = outcomes.map(odd => Math.round((100 / odd) / inverseSum * 100) / 100);
             const stakeContent = stakes.map(stake => `${stake}%`).join("<br>");

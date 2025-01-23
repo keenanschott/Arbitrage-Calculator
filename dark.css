@@ -17,7 +17,7 @@ body {
     text-align: center;
     margin: 0;
     padding: 12px 0;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
 }
 
 hr {
@@ -144,4 +144,14 @@ footer {
 
 .footer-text {
     margin-top: 0px;
+}
+
+@media screen and (max-width: 800px) {
+
+    #settings,
+    input[type="text"],
+    button,
+    #bets {
+        font-size: 10px;
+    }
 }
