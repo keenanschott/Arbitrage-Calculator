@@ -25,31 +25,31 @@ $(document).ready(async function () {
     // apply the correct theme and favicon based on stored preferences
     if (storedMode === "enabled") {
         themeLink.attr('href', 'dark.css');
-        themeIcon.classList.add('fa-sun-o');
+        themeIcon.classList.add('fa-sun');
         favicon.href = 'darkicon.ico';
     } else if (storedMode === "disabled") {
         themeLink.attr('href', 'light.css');
-        themeIcon.classList.add('fa-moon-o');
+        themeIcon.classList.add('fa-moon');
         favicon.href = 'lighticon.ico';
     } else {
         // use browser preferences if no stored preference exists
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             themeLink.attr('href', 'dark.css');
-            themeIcon.classList.add('fa-sun-o');
+            themeIcon.classList.add('fa-sun');
             favicon.href = 'darkicon.ico';
             localStorage.setItem("darkMode", "enabled");
         } else {
             themeLink.attr('href', 'light.css');
-            themeIcon.classList.add('fa-moon-o');
+            themeIcon.classList.add('fa-moon');
             favicon.href = 'lighticon.ico';
             localStorage.setItem("darkMode", "disabled");
         }
     }
     // add theme icon class based on the current mode
     if (localStorage.getItem("darkMode") === "enabled") {
-        document.getElementById('themeIcon').classList.add("fa-sun-o");
+        document.getElementById('themeIcon').classList.add("fa-sun");
     } else {
-        document.getElementById('themeIcon').classList.add("fa-moon-o");
+        document.getElementById('themeIcon').classList.add("fa-moon");
     }
     // add a click event listener for toggling the theme
     $('#darkModeToggle').click(function () {
@@ -57,14 +57,14 @@ $(document).ready(async function () {
         if (currentTheme === 'light.css') {
             themeLink.attr('href', 'dark.css');
             localStorage.setItem("darkMode", "enabled");
-            themeIcon.classList.remove('fa-moon-o');
-            themeIcon.classList.add('fa-sun-o');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
             favicon.href = 'darkicon.ico';
         } else {
             themeLink.attr('href', 'light.css');
             localStorage.setItem("darkMode", "disabled");
-            themeIcon.classList.remove('fa-sun-o');
-            themeIcon.classList.add('fa-moon-o');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
             favicon.href = 'lighticon.ico';
         }
     });
