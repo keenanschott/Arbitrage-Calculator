@@ -1,2 +1,13 @@
-# Arbitrage Calculator
-A simple arbitrage calculator for sports betting; this website gives users the chance to see current arbitrage opportunities on online sportsbooks at any given moment. It can also be cloned and hosted locally given the creation of an API key for [The Odds API](https://the-odds-api.com/), which is to be placed in `key.txt`. I use [XAMPP](https://www.apachefriends.org/) to host the site locally on my machine. This was a fun project to explore one of my interests and get some experience with front-end tools and languages.
+# arbitragecalculatorus.com
+
+## Setup
+
+The text field at the top of the page is designed for a [the-odds-api](https://the-odds-api.com/) key - the table will display live arbitrage betting opportunities once a valid key is submitted.
+
+## Arbitrage Betting
+
+Per [Wikipedia](https://en.wikipedia.org/wiki/Arbitrage_betting), betting arbitrage is an example of [arbitrage](https://en.wikipedia.org/wiki/Arbitrage) arising on betting markets due to either [bookmakers'](https://en.wikipedia.org/wiki/Bookmaker) differing opinions on event outcomes, or errors. When conditions allow, by placing one bet per each outcome with different betting companies, the bettor can make a profit regardless of the outcome. Mathematically, arbitrage occurs when there are a set of odds, which represent all mutually exclusive outcomes that cover all state space possibilities (i.e. all outcomes) of an event, whose implied probabilities add up to less than 1.
+
+## Closing Remarks
+
+This project welcomes open-source contributions. While I personally prefer to keep the site simple and lightweight, I am open to adopting a web framework if greater complexity becomes necessary. However, as long as this remains primarily a personal tool, I am inclined to avoid developing a back-end or incorporating web frameworks.
