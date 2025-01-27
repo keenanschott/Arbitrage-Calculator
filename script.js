@@ -9,24 +9,30 @@
  * - Triggers the calculation of bets once the document is ready.
  */
 $(document).ready(async function () {
-    // retrieve stored API key from localStorage and set it in the input field
-    const storedApiKey = localStorage.getItem("apiKey") || "";
-    $('#apiKeyInput').val(storedApiKey);
-    // event listener for setting a new API key
-    $('#setApiKeyButton').click(async function () {
-        const apiKey = $('#apiKeyInput').val();
-        // Store the new API key in localStorage
-        localStorage.setItem("apiKey", apiKey);
-        // Clear the results table and trigger bet calculation
-        $('#calc_bets').empty();
+    // API key initialization; check stored key or set an empty string
+    if (!localStorage.hasOwnProperty("key")) {
+        localStorage.setItem("key", "");
+    }
+    const storedKey = localStorage.getItem("key");
+    $('#APIKeyInput').val(storedKey);
+    // add functionality to the API key button
+    $('#setAPIKeyButton').click(async function () {
+        const key = $('#APIKeyInput').val();
+        // store the new API key in localStorage
+        localStorage.setItem("key", key);
+        // clear the table and calculate bets with the new key
+        $('#calcBets').empty();
         await calculateBets();
     });
-    // theme initialization: check stored preferences or system defaults
+    // theme initialization; check stored preferences or set based on system default
+    if (!localStorage.hasOwnProperty("darkMode")) {
+        localStorage.setItem("darkMode", (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? "enabled" : "disabled");
+    }
     const storedMode = localStorage.getItem("darkMode");
     const themeLink = $('#theme-link');
     const themeIcon = $('#themeIcon');
     const favicon = $('#favicon');
-    // apply the correct theme and favicon based on stored preferences
+    // set the theme based on stored preferences
     if (storedMode === "enabled") {
         themeLink.attr('href', './css/dark.css');
         themeIcon.addClass('fa-sun');
@@ -35,22 +41,8 @@ $(document).ready(async function () {
         themeLink.attr('href', './css/light.css');
         themeIcon.addClass('fa-moon');
         favicon.attr('href', './assets/lighticon.ico');
-    } else {
-        // use system preferences if no stored preference exists
-        const isDarkModePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (isDarkModePreferred) {
-            themeLink.attr('href', './css/dark.css');
-            themeIcon.addClass('fa-sun');
-            favicon.attr('href', './assets/darkicon.ico');
-            localStorage.setItem("darkMode", "enabled");
-        } else {
-            themeLink.attr('href', './css/light.css');
-            themeIcon.addClass('fa-moon');
-            favicon.attr('href', './assets/lighticon.ico');
-            localStorage.setItem("darkMode", "disabled");
-        }
     }
-    // add theme toggle functionality
+    // add functionality to the dark mode toggle button
     $('#darkModeToggle').click(function () {
         const isLightMode = themeLink.attr('href') === './css/light.css';
         if (isLightMode) {
@@ -65,7 +57,7 @@ $(document).ready(async function () {
             favicon.attr('href', './assets/lighticon.ico');
         }
     });
-    // trigger bet calculation and display results
+    // calculate bets once the document is ready
     await calculateBets();
 });
 
@@ -81,30 +73,30 @@ $(document).ready(async function () {
  */
 async function calculateBets() {
     // retrieve API key from localStorage and trim any trailing spaces
-    const apiKey = localStorage.getItem("apiKey").trimEnd();
-    if (apiKey === "") {
-        $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>please enter a key to find arbitrage opportunities</td></tr>");
+    const key = localStorage.getItem("key").trimEnd();
+    if (key === "") {
+        $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>please enter a key to find arbitrage opportunities</td></tr>");
         return;
     }
     // test the connection using the API key
-    const validConnection = await testConnection(apiKey);
+    const validConnection = await testConnection(key);
     if (!validConnection) {
-        $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>invalid key, try again</td></tr>");
+        $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>invalid key, try again</td></tr>");
         return;
     }
     // initialize an empty array to store the arbitrage opportunities
     let allRows = [];
-    allRows = allRows.concat(await spread(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`)); 
-    allRows = allRows.concat(await total(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));  
-    allRows = allRows.concat(await moneyline(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
+    allRows = allRows.concat(await spread(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
+    allRows = allRows.concat(await total(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
+    allRows = allRows.concat(await moneyline(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
     // check if there are any opportunities found
     if (allRows.length > 0) {
         // sort the opportunities by profit in descending order
         allRows.sort((a, b) => parseFloat(b.profit) - parseFloat(a.profit));
-        $('#calc_bets').append(allRows.map(row => row.html).join(""));
+        $('#calcBets').append(allRows.map(row => row.html).join(""));
     } else {
         // if no opportunities are found, show a message indicating no arbitrage opportunities
-        $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>there are currently no arbitrage opportunities</td></tr>");
+        $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>there are currently no arbitrage opportunities</td></tr>");
     }
 }
 
@@ -249,7 +241,6 @@ async function spread(requestURL) {
     try {
         const response = await fetch(requestURL);
         const data = await response.json();
-        console.log(data);
         const opportunities = [];
         for (const match of data) {
             // group outcomes by point spread (e.g., -3.5, +2.5)
