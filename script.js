@@ -3,7 +3,7 @@
  * 
  * The function performs the following tasks:
  * - Fetches and sets the API key in the input field.
- * - Handles the "Set API Key" button click to store the API key in localStorage and trigger bet calculation.
+ * - Handles the API button click to store the API key in localStorage and trigger bet calculation.
  * - Initializes the theme (light or dark) based on user preferences or system default.
  * - Provides functionality to toggle between light and dark modes, storing preferences in localStorage.
  * - Triggers the calculation of bets once the document is ready.
@@ -73,55 +73,37 @@ $(document).ready(async function () {
  * Calculates and displays arbitrage opportunities based on the available betting odds.
  * 
  * This function fetches betting odds from multiple sports bookmakers and checks for arbitrage opportunities 
- * in three different market types: head-to-head (moneyline), spreads, and totals. It uses the provided API key 
+ * in three different market types: head-to-head (moneyline), the spread, and totals. It uses the provided API key 
  * stored in localStorage to access the odds API and handles potential errors such as invalid keys or missing data.
  * 
  * @returns {Promise<void>} - A promise that resolves once the arbitrage opportunities have been fetched 
  * and displayed or an error message is shown.
  */
 async function calculateBets() {
-    // Retrieve API key from localStorage and trim any trailing spaces
+    // retrieve API key from localStorage and trim any trailing spaces
     const apiKey = localStorage.getItem("apiKey").trimEnd();
-
-    // If no API key is provided, show an error message
     if (apiKey === "") {
         $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>please enter a key to find arbitrage opportunities</td></tr>");
         return;
     }
-
-    // Test the connection using the API key
+    // test the connection using the API key
     const validConnection = await testConnection(apiKey);
-
-    // If the connection is invalid, show an error message
     if (!validConnection) {
         $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>invalid key, try again</td></tr>");
         return;
     }
-
-    // Define URLs for different market types (head-to-head, spreads, totals)
-    const urls = [
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`,
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`,
-        `https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`
-    ];
-
-    // Initialize an empty array to store the arbitrage opportunities
+    // initialize an empty array to store the arbitrage opportunities
     let allRows = [];
-
-    // Fetch and process the spread, total, and moneyline market data
-    allRows = allRows.concat(await spread(urls[1]));  // Fetch spreads
-    allRows = allRows.concat(await total(urls[2]));   // Fetch totals
-    allRows = allRows.concat(await moneyline(urls[0])); // Fetch moneylines
-
-    // Check if there are any opportunities found
+    allRows = allRows.concat(await spread(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`)); 
+    allRows = allRows.concat(await total(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));  
+    allRows = allRows.concat(await moneyline(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${apiKey}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
+    // check if there are any opportunities found
     if (allRows.length > 0) {
-        // Sort the opportunities by profit in descending order
+        // sort the opportunities by profit in descending order
         allRows.sort((a, b) => parseFloat(b.profit) - parseFloat(a.profit));
-
-        // Append the sorted opportunities as HTML rows to the table
         $('#calc_bets').append(allRows.map(row => row.html).join(""));
     } else {
-        // If no opportunities are found, show a message indicating no arbitrage opportunities
+        // if no opportunities are found, show a message indicating no arbitrage opportunities
         $('#calc_bets').append("<tr><td colspan='5' style='text-align: center;'>there are currently no arbitrage opportunities</td></tr>");
     }
 }
@@ -267,7 +249,7 @@ async function spread(requestURL) {
     try {
         const response = await fetch(requestURL);
         const data = await response.json();
-
+        console.log(data);
         const opportunities = [];
         for (const match of data) {
             // group outcomes by point spread (e.g., -3.5, +2.5)
@@ -331,11 +313,11 @@ async function spread(requestURL) {
 }
 
 /**
- * Formats arbitrage opportunities into an HTML table row.
+ * Formats arbitrage opportunities into an HTML table row and calculates profit.
  *
  * @param {Object} opportunities - The arbitrage opportunity data.
  * @param {string} market - The market type (e.g., "total").
- * @returns {string} - Formatted HTML row as a string.
+ * @returns {Object} - An object containing the formatted HTML row (`html`) and the profit (`profit`).
  */
 function format(opportunities, market) {
     let row = "<tr>";
@@ -372,7 +354,10 @@ function format(opportunities, market) {
     const profit = ((1 / totalInverseOdds) - 1) * 100;
     row += `<td>${profit.toFixed(2)}%</td>`;
     row += "</tr>";
-    return row;
+    return {
+        html: row,
+        profit: profit.toFixed(2)
+    };
 }
 
 /**
