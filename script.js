@@ -1,30 +1,31 @@
 /**
- * Initializes the page by setting up the API key, theme preferences, and triggering the bet calculation.
+ * arbitragecalculatorus.com
  * 
- * The function performs the following tasks:
- * - Fetches and sets the API key in the input field.
- * - Handles the API button click to store the API key in localStorage and trigger bet calculation.
- * - Initializes the theme (light or dark) based on user preferences or system default.
- * - Provides functionality to toggle between light and dark modes, storing preferences in localStorage.
- * - Triggers the calculation of bets once the document is ready.
+ * This script provides functionality to calculate and display arbitrage opportunities.
+ * 
+ * This function performs the following tasks:
+ * - Retrieves the API key from localStorage and sets it in the input field.
+ * - Retrieves the theme preferences from localStorage and sets the theme based on the stored value.
+ * - Adds functionality to the API key button to store the new key and recalculate bets.
+ * - Adds functionality to the dark mode toggle button to switch between light and dark themes.
+ * - Calls the `calculateBets` function to calculate and display arbitrage opportunities.
  */
 $(document).ready(async function () {
-    // API key initialization; check stored key or set an empty string
-    if (!localStorage.hasOwnProperty("key")) {
-        localStorage.setItem("key", "");
+    // API key initialization; check stored key or set to empty string
+    if (!localStorage.hasOwnProperty("API")) {
+        localStorage.setItem("API", "");
     }
-    const storedKey = localStorage.getItem("key");
+    const storedKey = localStorage.getItem("API");
     $('#APIKeyInput').val(storedKey);
     // add functionality to the API key button
     $('#setAPIKeyButton').click(async function () {
         const key = $('#APIKeyInput').val();
-        // store the new API key in localStorage
-        localStorage.setItem("key", key);
-        // clear the table and calculate bets with the new key
+        // store the new key and recalculate bets
+        localStorage.setItem("API", key);
         $('#calcBets').empty();
         await calculateBets();
     });
-    // theme initialization; check stored preferences or set based on system default
+    // theme initialization; check stored theme or set based on system preferences
     if (!localStorage.hasOwnProperty("darkMode")) {
         localStorage.setItem("darkMode", (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? "enabled" : "disabled");
     }
@@ -32,7 +33,7 @@ $(document).ready(async function () {
     const themeLink = $('#theme-link');
     const themeIcon = $('#themeIcon');
     const favicon = $('#favicon');
-    // set the theme based on stored preferences
+    // set the theme based on the stored value
     if (storedMode === "enabled") {
         themeLink.attr('href', './css/dark.css');
         themeIcon.addClass('fa-sun');
@@ -73,7 +74,7 @@ $(document).ready(async function () {
  */
 async function calculateBets() {
     // retrieve API key from localStorage and trim any trailing spaces
-    const key = localStorage.getItem("key").trimEnd();
+    const key = localStorage.getItem("API").trimEnd();
     if (key === "") {
         $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>please enter a key to find arbitrage opportunities</td></tr>");
         return;
@@ -84,19 +85,64 @@ async function calculateBets() {
         $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>invalid key, try again</td></tr>");
         return;
     }
+    // check if the user has enough requests remaining
+    const requestsRemain = await testRequests(key);
+    if (!requestsRemain) {
+        $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>you have exceeded the request limit</td></tr>");
+        return;
+    }
     // initialize an empty array to store the arbitrage opportunities
     let allRows = [];
+    allRows = allRows.concat(await moneyline(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
     allRows = allRows.concat(await spread(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=spreads&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
     allRows = allRows.concat(await total(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=totals&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
-    allRows = allRows.concat(await moneyline(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${key}&regions=us&markets=h2h&bookmakers=betonlineag,betmgm,betrivers,betus,bovada,draftkings,fanduel,lowvig,mybookieag&includeLinks=true`));
     // check if there are any opportunities found
     if (allRows.length > 0) {
         // sort the opportunities by profit in descending order
         allRows.sort((a, b) => parseFloat(b.profit) - parseFloat(a.profit));
+        // display the opportunities in the table
         $('#calcBets').append(allRows.map(row => row.html).join(""));
     } else {
         // if no opportunities are found, show a message indicating no arbitrage opportunities
         $('#calcBets').append("<tr><td colspan='5' style='text-align: center;'>there are currently no arbitrage opportunities</td></tr>");
+    }
+}
+
+/**
+ * Tests the validity of an API key by making a request to the odds API.
+ * 
+ * @param {string} key - The API key to test.
+ * @returns {Promise<boolean>} - A promise that resolves to `true` if the API key is valid, `false` otherwise.
+ */
+async function testConnection(key) {
+    try {
+        const response = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${key}`);
+        console.log(response);
+        response.headers.forEach((value, key) => console.log(`${key}: ${value}`));
+        response.headers['x-requests-remaining'] <= 0;
+        return response.status !== 401;
+    }
+    catch (error) {
+        console.error(`Failed to fetch using the following key: ${key}`, error);
+        return false;
+    }
+}
+
+/**
+ * Tests the number of remaining requests for an API key.
+ * 
+ * @param {string} key - The API key to test.
+ * @returns {Promise<boolean>} - A promise that resolves to `true` if the user has requests remaining, `false` otherwise.
+ */
+async function testRequests(key) {
+    try {
+        const response = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${key}`);
+        const requestsRemaining = response.headers.get('x-requests-remaining');
+        return requestsRemaining >= 3;
+    }
+    catch (error) {
+        console.error(`Failed to fetch using the following key: ${key}`, error);
+        return false;
     }
 }
 
@@ -108,33 +154,36 @@ async function calculateBets() {
  */
 async function moneyline(requestURL) {
     try {
+        // fetch the data from the API
         const response = await fetch(requestURL);
         const data = await response.json();
         const opportunities = [];
         for (const match of data) {
-            // initialize contenders with dummy price to compare later
+            // initialize the contenders with default values
             let contenders = [
                 { price: 0, name: match.away_team, bookmaker: "", link: "" },
                 { price: 0, name: match.home_team, bookmaker: "", link: "" },
-                { price: 0, name: "DRAW", bookmaker: "", link: "" }
+                { price: 0, name: "Draw", bookmaker: "", link: "" }
             ];
             for (const bookmaker of match.bookmakers ?? []) {
                 const outcomes = bookmaker.markets[0]?.outcomes ?? [];
-                // process each outcome and compare it with the current contenders
-                outcomes.forEach((outcome) => {
-                    if (outcome && outcome.price > 0) {
-                        if (outcome.name === match.away_team && outcome.price > contenders[0].price) {
-                            contenders[0].price = outcome.price;
-                            contenders[0].bookmaker = bookmaker.title;
-                            contenders[0].link = bookmaker.link;
-                        } else if (outcome.name === match.home_team && outcome.price > contenders[1].price) {
-                            contenders[1].price = outcome.price;
-                            contenders[1].bookmaker = bookmaker.title;
-                            contenders[1].link = bookmaker.link;
-                        } else if (outcome.name === "Draw" && outcome.price > contenders[2].price) {
-                            contenders[2].price = outcome.price;
-                            contenders[2].bookmaker = bookmaker.title;
-                            contenders[2].link = bookmaker.link;
+                // iterate over the outcomes to find the best price for each contender
+                outcomes.forEach(outcome => {
+                    if (outcome?.price > 0) {
+                        const index = outcome.name === match.away_team
+                            ? 0
+                            : outcome.name === match.home_team
+                                ? 1
+                                : outcome.name === "Draw"
+                                    ? 2
+                                    : -1;
+                        // update the contender if the price is higher than the current best price
+                        if (index >= 0 && outcome.price > contenders[index].price) {
+                            Object.assign(contenders[index], {
+                                price: outcome.price,
+                                bookmaker: bookmaker.title,
+                                link: bookmaker.link ?? ""
+                            });
                         }
                     }
                 });
@@ -143,7 +192,8 @@ async function moneyline(requestURL) {
             contenders = contenders.filter(contender => contender.price > 0);
             let arbitrage = 0;
             contenders.forEach(contender => arbitrage += 1 / contender.price);
-            if (arbitrage < 1) {
+            // check for arbitrage opportunities
+            if (contenders.length >= 2 && arbitrage < 1) {
                 opportunities.push({
                     match: `${match.away_team} @ ${match.home_team}`,
                     contenders: contenders
@@ -151,80 +201,7 @@ async function moneyline(requestURL) {
             }
         }
         // format and return the opportunities as HTML rows
-        return opportunities.map(opportunity => format(opportunity));
-    } catch (error) {
-        console.error('Error fetching market data:', error);
-        return [];
-    }
-}
-
-/**
- * Finds arbitrage opportunities in over/under markets.
- * 
- * @param {string} requestURL - The totals URL to fetch market data from.
- * @returns {Promise<string[]>} - A promise resolving to an array of formatted HTML rows.
- */
-async function total(requestURL) {
-    try {
-        const response = await fetch(requestURL);
-        const data = await response.json();
-        const opportunities = [];
-        for (const match of data) {
-            // consider opportunities across different points
-            // e.g., +1.5 and +2.5
-            const outcomesByPoint = new Map();
-            for (const bookmaker of match.bookmakers ?? []) {
-                for (const marketEntry of bookmaker.markets ?? []) {
-                    for (const outcome of marketEntry.outcomes ?? []) {
-                        const point = outcome.point;
-                        const outcomes = outcomesByPoint.get(point) || [];
-                        outcomes.push({
-                            price: outcome.price,
-                            contender: outcome.name,
-                            bookmaker: bookmaker.key,
-                            // arbitrarily set the state in links to CO
-                            link: (bookmaker.link ?? "").replace("{state}", "co")
-                        });
-                        outcomesByPoint.set(point, outcomes);
-                    }
-                }
-            }
-            // iterate over the refined data
-            for (const [point, outcomes] of outcomesByPoint) {
-                const bestOver = outcomes
-                    .filter(o => o.contender === "Over")
-                    .reduce((best, o) => (o.price > best.price ? o : best), { price: 0 });
-                const bestUnder = outcomes
-                    .filter(o => o.contender === "Under")
-                    .reduce((best, o) => (o.price > best.price ? o : best), { price: 0 });
-                if (bestOver.price > 0 && bestUnder.price > 0) {
-                    // check for arbitrage
-                    const arbitrage = (1 / bestOver.price) + (1 / bestUnder.price);
-                    if (arbitrage < 1) {
-                        opportunities.push({
-                            match: `${match.away_team} @ ${match.home_team}`,
-                            point: point,
-                            contenders: [
-                                {
-                                    name: "O",
-                                    price: bestOver.price,
-                                    bookmaker: bestOver.bookmaker,
-                                    link: bestOver.link ?? ""
-                                },
-                                {
-                                    name: "U",
-                                    price: bestUnder.price,
-                                    bookmaker: bestUnder.bookmaker,
-                                    link: bestUnder.link ?? ""
-                                }
-                            ]
-                        });
-                    }
-                }
-            }
-        }
-        const final = opportunities.map(opportunity => format(opportunity, "total"));
-        return final;
+        return opportunities.map(opportunity => format(opportunity, "moneyline"));
     } catch (error) {
         console.error('Error fetching market data:', error);
         return [];
@@ -239,23 +216,24 @@ async function total(requestURL) {
  */
 async function spread(requestURL) {
     try {
+        // fetch the data from the API
         const response = await fetch(requestURL);
         const data = await response.json();
         const opportunities = [];
         for (const match of data) {
-            // group outcomes by point spread (e.g., -3.5, +2.5)
+            // group outcomes by point spread (e.g., -2.5, +3.5)
             const outcomesByPoint = new Map();
             for (const bookmaker of match.bookmakers ?? []) {
                 for (const marketEntry of bookmaker.markets ?? []) {
                     for (const outcome of marketEntry.outcomes ?? []) {
+                        // store the outcomes by point spread (positive or negative)
                         const point = Math.abs(outcome.point);
                         const outcomes = outcomesByPoint.get(point) || [];
                         outcomes.push({
                             price: outcome.price,
                             contender: outcome.name,
                             bookmaker: bookmaker.key,
-                            // arbitrarily set the state in links to CO
-                            link: (bookmaker.link ?? "").replace("{state}", "co")
+                            link: bookmaker.link ?? ""
                         });
                         outcomesByPoint.set(point, outcomes);
                     }
@@ -263,12 +241,14 @@ async function spread(requestURL) {
             }
             // iterate over the refined data
             for (const [point, outcomes] of outcomesByPoint) {
+                // find the best price for the away and home contenders
                 const bestAway = outcomes
                     .filter(o => o.contender === match.away_team)
                     .reduce((best, o) => (o.price > best.price ? o : best), { price: 0 });
                 const bestHome = outcomes
                     .filter(o => o.contender === match.home_team)
                     .reduce((best, o) => (o.price > best.price ? o : best), { price: 0 });
+                // check if both contenders have valid prices
                 if (bestAway.price > 0 && bestHome.price > 0) {
                     // check for arbitrage
                     const arbitrage = (1 / bestAway.price) + (1 / bestHome.price);
@@ -281,13 +261,13 @@ async function spread(requestURL) {
                                     name: match.away_team,
                                     price: bestAway.price,
                                     bookmaker: bestAway.bookmaker,
-                                    link: (bestAway.link ?? "").replace("{state}", "co")
+                                    link: bestAway.link ?? ""
                                 },
                                 {
                                     name: match.home_team,
                                     price: bestHome.price,
                                     bookmaker: bestHome.bookmaker,
-                                    link: (bestHome.link ?? "").replace("{state}", "co")
+                                    link: bestHome.link ?? ""
                                 }
                             ]
                         });
@@ -295,8 +275,83 @@ async function spread(requestURL) {
                 }
             }
         }
-        const final = opportunities.map(opportunity => format(opportunity, "spread"));
-        return final;
+        // format and return the opportunities as HTML rows
+        return opportunities.map(opportunity => format(opportunity, "spread"));
+    } catch (error) {
+        console.error('Error fetching market data:', error);
+        return [];
+    }
+}
+
+/**
+ * Finds arbitrage opportunities in over/under markets.
+ * 
+ * @param {string} requestURL - The totals URL to fetch market data from.
+ * @returns {Promise<string[]>} - A promise resolving to an array of formatted HTML rows.
+ */
+async function total(requestURL) {
+    try {
+        // fetch the data from the API
+        const response = await fetch(requestURL);
+        const data = await response.json();
+        const opportunities = [];
+        for (const match of data) {
+            // group outcomes by point spread (e.g., 2.5, 3.5)
+            const outcomesByPoint = new Map();
+            for (const bookmaker of match.bookmakers ?? []) {
+                for (const marketEntry of bookmaker.markets ?? []) {
+                    for (const outcome of marketEntry.outcomes ?? []) {
+                        // store the outcomes by point spread
+                        const point = outcome.point;
+                        const outcomes = outcomesByPoint.get(point) || [];
+                        outcomes.push({
+                            price: outcome.price,
+                            contender: outcome.name,
+                            bookmaker: bookmaker.title,
+                            link: bookmaker.link ?? ""
+                        });
+                        outcomesByPoint.set(point, outcomes);
+                    }
+                }
+            }
+            // iterate over the refined data
+            for (const [point, outcomes] of outcomesByPoint) {
+                // find the best price for the over and under contenders
+                const bestOver = outcomes
+                    .filter(o => o.contender === "Over")
+                    .reduce((best, o) => (o.price > best.price ? o : best), { price: 0 });
+                const bestUnder = outcomes
+                    .filter(o => o.contender === "Under")
+                    .reduce((best, o) => (o.price > best.price ? o : best), { price: 0 });
+                // check if both contenders have valid prices
+                if (bestOver.price > 0 && bestUnder.price > 0) {
+                    // check for arbitrage
+                    const arbitrage = (1 / bestOver.price) + (1 / bestUnder.price);
+                    if (arbitrage < 1) {
+                        opportunities.push({
+                            match: `${match.away_team} @ ${match.home_team}`,
+                            point: point,
+                            contenders: [
+                                {
+                                    name: "Over",
+                                    price: bestOver.price,
+                                    bookmaker: bestOver.bookmaker,
+                                    link: bestOver.link ?? ""
+                                },
+                                {
+                                    name: "Under",
+                                    price: bestUnder.price,
+                                    bookmaker: bestUnder.bookmaker,
+                                    link: bestUnder.link ?? ""
+                                }
+                            ]
+                        });
+                    }
+                }
+            }
+        }
+        // format and return the opportunities as HTML rows
+        return opportunities.map(opportunity => format(opportunity, "total"));
     } catch (error) {
         console.error('Error fetching market data:', error);
         return [];
@@ -325,7 +380,7 @@ function format(opportunities, market) {
         .map(contender => {
             const americanOdds = convertDecimalToAmericanOdds(contender.price);
             const link = contender.link
-                ? `<b><a href="${contender.link}" target="_blank" class="no-style">${contender.bookmaker}</a></b>`
+                ? `<b><a href="${contender.link.replace("{state}", "co")}" target="_blank" class="no-style">${contender.bookmaker}</a></b>`
                 : contender.bookmaker;
             return `${contender.name}<br>${link}<br>${contender.price} / ${americanOdds}`;
         })
@@ -366,22 +421,5 @@ function convertDecimalToAmericanOdds(decimalOdds) {
         return `+${Math.round((decimalOdds - 1) * 100)}`;
     } else {
         return `-${Math.round(100 / (decimalOdds - 1))}`;
-    }
-}
-
-/**
- * Tests the validity of an API key by making a request to the odds API.
- * 
- * @param {string} key - The API key to test.
- * @returns {Promise<boolean>} - A promise that resolves to `true` if the API key is valid, `false` otherwise.
- */
-async function testConnection(key) {
-    try {
-        const response = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${key}`);
-        return response.status !== 401;
-    }
-    catch (error) {
-        console.error(`Failed to fetch using the following key: ${key}`, error);
-        return false;
     }
 }
