@@ -232,7 +232,7 @@ async function spread(requestURL) {
                         outcomes.push({
                             price: outcome.price,
                             contender: outcome.name,
-                            bookmaker: bookmaker.key,
+                            bookmaker: bookmaker.title,
                             link: bookmaker.link ?? ""
                         });
                         outcomesByPoint.set(point, outcomes);
